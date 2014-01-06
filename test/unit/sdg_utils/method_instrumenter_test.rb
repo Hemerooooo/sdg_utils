@@ -1,6 +1,6 @@
-require 'my_test_helper.rb'
+require 'my_test_helper'
 require 'benchmark'
-require 'sdg_utils/proxy.rb'
+require 'sdg_utils/proxy'
 
 module SDGUtils
 

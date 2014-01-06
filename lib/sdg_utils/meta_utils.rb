@@ -1,3 +1,5 @@
+require 'sdg_utils/random'
+
 module SDGUtils
 
   # Usage: include this module in your class
@@ -6,7 +8,14 @@ module SDGUtils
 
     def shadow_methods_while(hash, ctx=nil, &block)
       ctx ||= block.binding.eval "self"
+      cls = ctx.singleton_class
+      old_mthds = {}
       hash.each do |mth_name, ret_val|
+        if cls.instance_methods(false).member? mth_name
+          clone_name = "#{mth_name}_#{Random.salted_timestamp}".to_sym
+          cls.send :alias_method, clone_name, mth_name
+          old_mthds[mth_name] = clone_name
+        end
         ctx.define_singleton_method mth_name.to_sym, lambda{ret_val}
       end
       begin
@@ -17,7 +26,11 @@ module SDGUtils
         end
       ensure
         hash.each do |mth_name, _|
-          ctx.define_singleton_method mth_name.to_sym do super() end
+          if clone_name = old_mthds[mth_name]
+            cls.class_eval "def #{mth_name}(*a,&b) #{clone_name}(*a,&b) end"
+          else
+            cls.class_eval "def #{mth_name}(*a,&b) super() end"
+          end
         end
       end
     end
