@@ -82,6 +82,15 @@ module SDGUtils
   class MetaUtils
     class << self
 
+      def morph_into(from, to)
+        to.class.instance_methods.each do |m|
+          unless m =~ /(^__|^send$|^object_id$)/
+            from.define_singleton_method m, proc{|*a, &b| to.send m, *a, &b}
+          end
+        end
+      end
+
+
       def check_identifier(str)
         return nil unless str
         # ok = ::Object.new.send(:define_singleton_method, str, lambda{}) rescue false
