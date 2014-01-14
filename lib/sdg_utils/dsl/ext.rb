@@ -8,6 +8,50 @@ def in_dsl?()   SDGUtils::DSL::BaseBuilder.in_builder? end
 module SDGUtils
   module DSL
     module Ext
+
+      #=====================================================================
+      # == Extensions to class +Module+
+      #=====================================================================
+      module MModuleExt
+        #--------------------------------------------------------------------
+        # Helper method that returns the name of the module which this class
+        # was defined in (where everything after and including the last
+        # appearance of '::' is stripped out).
+        # -------------------------------------------------------------------
+        def module_name() to_s.module_name end
+
+        #--------------------------------------------------------
+        # Helper method that returns the relative (i.e., simple) name of
+        # this class (where all module name prefixes are stripped out).
+        #--------------------------------------------------------
+        def relative_name() to_s.relative_name end
+      end
+
+      #=====================================================================
+      # == Extensions to class +String+
+      #=====================================================================
+      module MStringExt
+        def split_to_module_and_relative
+          sp = split('::')
+          [sp[0..-2].join('::'), sp.last]
+        end
+
+        #---------------------------------------------------------------
+        # Strips out everything after the last appearance of '::'.
+        #---------------------------------------------------------------
+        def module_name
+          split_to_module_and_relative[0]
+        end
+
+        #--------------------------------------------------------
+        # Strips out everything but the substring after the last
+        # appearance of '::'.
+        #--------------------------------------------------------
+        def relative_name
+          split_to_module_and_relative[1]
+        end
+      end
+
       # --------------------------------------------------------
       # Catches all +const_missing+ events, so that, only when
       # evaluating in the context of Dsl, instead of failing it simply
@@ -27,6 +71,13 @@ module SDGUtils
           MissingBuilder.new sym
         end
       end
+
+      def self.safe_extend(parent_mod, *clses)
+        clses.each do |cls|
+          ext = parent_mod.const_get("M#{cls.relative_name}Ext")
+          cls.send :include, ext
+        end
+      end
     end
   end
 end
@@ -44,6 +95,8 @@ class << Object
 end
 
 class Module
+  include SDGUtils::DSL::Ext::MModuleExt
+
   alias_method :old_const_missing, :const_missing
 
   def const_missing(sym)
@@ -57,31 +110,11 @@ class Module
 end
 
 #--------------------------------------------------------
-# == Extensions to class +Class+
-#--------------------------------------------------------
-class Module
-  #--------------------------------------------------------------------
-  # Helper method that returns the name of the module which this class
-  # was defined in (where everything after and including the last
-  # appearance of '::' is stripped out).
-  # -------------------------------------------------------------------
-  def module_name
-    to_s.module_name
-  end
-
-  #--------------------------------------------------------
-  # Helper method that returns the relative (i.e., simple) name of
-  # this class (where all module name prefixes are stripped out).
-  #--------------------------------------------------------
-  def relative_name
-    to_s.relative_name
-  end
-end
-
-#--------------------------------------------------------
 # == Extensions to class +String+
 #--------------------------------------------------------
 class String
+  include SDGUtils::DSL::Ext::MStringExt
+
   alias_method :old_cmp, :<
 
   #-----------------------------------------------------------------
@@ -99,26 +132,6 @@ class String
     else
       old_cmp rhs
     end
-  end
-
-  def split_to_module_and_relative
-    sp = split('::')
-    [sp[0..-2].join('::'), sp.last]
-  end
-
-  #---------------------------------------------------------------
-  # Strips out everything after the last appearance of '::'.
-  #---------------------------------------------------------------
-  def module_name
-    split_to_module_and_relative[0]
-  end
-
-  #--------------------------------------------------------
-  # Strips out everything but the substring after the last
-  # appearance of '::'.
-  #--------------------------------------------------------
-  def relative_name
-    split_to_module_and_relative[1]
   end
 end
 
