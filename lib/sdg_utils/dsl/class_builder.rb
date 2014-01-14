@@ -55,14 +55,14 @@ module SDGUtils
       # creates a constant with a given +name+ in the callers
       # namespace and assigns the created class to it.
       # --------------------------------------------------------------
-      def do_build1(name, params={}, &body)
+      def do_build1(name, *params, &body)
         supercls = @conf.superclass
         cls_name, super_cls =
           case name
           when MissingBuilder
             missing = name
             missing.consume
-            params = missing.args.merge(params)
+            params = missing.args + params
             body = body || missing.body
             [missing.name, missing.super || supercls]
           when Class, String, Symbol

@@ -5,7 +5,7 @@ module SDGUtils
   module DSL
 
     # @attribute name [Symbol]               --- the original missing symbol
-    # @attribute args [Hash]                 --- arguments (first invocation of :[])
+    # @attribute args [Array]                --- arguments (first invocation of :[])
     # @attribute ret_type [Object]           --- return type (second invocation of :[])
     # @attribute mods [Array(String, Array)] --- modifier name-value pairs
     # @attribute super [Object]              --- super type (set by the :< method)
@@ -17,7 +17,7 @@ module SDGUtils
         super(name)
         # puts "created: #{name}: has block: #{!!block}"
         @name = name
-        @args = {}
+        @args = []
         @ret_type = nil
         @state = :init
         @body = block
@@ -30,11 +30,11 @@ module SDGUtils
       end
 
       def append(other_builder)
-        @args.merge! other_builder.args
-        @ret_type    ||= other_builder._ret_type
-        @body        ||= other_builder.body
-        @super       ||= other_builder.super
-        @mods         += other_builder.mods
+        @args      += other_builder.args
+        @ret_type ||= other_builder._ret_type
+        @body     ||= other_builder.body
+        @super    ||= other_builder.super
+        @mods      += other_builder.mods
       end
 
       def consume()
@@ -79,7 +79,7 @@ module SDGUtils
         @super = super_thing
         if MissingBuilder === super_thing #&& super_thing.body
           @super = eval super_thing.name.to_s
-          @args.merge! super_thing.args
+          @args += super_thing.args
           @body = super_thing.body if super_thing.body
           super_thing.consume
         end
@@ -93,7 +93,7 @@ module SDGUtils
       def [](*args)
         case @state
         when :init
-          @args = to_args_hash(args)
+          @args += args
           @state = :args
         when :args
           msg = "can only specify 1 arg for return type"
@@ -144,24 +144,6 @@ module SDGUtils
 
       # TODO: must not have refs to Arby
       def notype() @notype ||= ::Arby::Ast::NoType.new end
-
-      def to_args_hash(args)
-        if args.size == 1
-          args.first
-        else
-          args
-        end
-        # case
-        # when args.size == 1 && ::Hash === args[0]
-        #   args[0]
-        # else
-        #   # treat as a list of arg names
-        #   args.reduce({}) do |acc, arg_name|
-        #     acc.merge!({arg_name => notype})
-        #   end
-        # end
-      end
-
     end
 
   end
