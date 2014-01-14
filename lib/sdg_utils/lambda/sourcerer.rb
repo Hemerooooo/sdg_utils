@@ -123,7 +123,7 @@ module SDGUtils
         out
       end
 
-      def reprint(node, &block)
+      def reprint(node)
         return "" unless node
         node2anno = annotate_for_printing(node)
         nodes_bottomup = traverse_nodes(node).reverse
