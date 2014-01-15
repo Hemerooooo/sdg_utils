@@ -42,11 +42,12 @@ module SDGUtils
         # alias_method :sig, :get_sig
         # alias_method :sig!, :get_sig!
         def attr_searchable(*whats)
+          mod = Module.new
           whats.each do |what|
             self.instance_eval <<-RUBY, __FILE__, __LINE__+1
               (@searchable_attrs ||= []) << #{pl(what).to_sym.inspect}
             RUBY
-            self.class_eval <<-RUBY, __FILE__, __LINE__+1
+            mod.send :module_eval, <<-RUBY, __FILE__, __LINE__+1
   private
   def _#{pl what}()      _restrict(@#{pl what} ||= []) end
   def _#{what}_cache()
@@ -67,6 +68,7 @@ module SDGUtils
   alias_method :#{what}!, :get_#{what}!
             RUBY
           end
+          self.send :include, mod
         end
 
         # Generates several methods for each symbol in `whats'.  For
@@ -91,11 +93,12 @@ module SDGUtils
         #   alias_method :sig, :get_sig
         #   alias_method :sig!, :get_sig!
         def attr_hier_searchable(*whats)
+          mod = Module.new
           whats.each do |what|
             self.instance_eval <<-RUBY, __FILE__, __LINE__+1
               (@searchable_attrs ||= []) << #{pl(what).to_sym.inspect}
             RUBY
-            self.class_eval <<-RUBY, __FILE__, __LINE__+1
+            mod.send :module_eval, <<-RUBY, __FILE__, __LINE__+1
   protected
   def _#{pl what}(own_only=true) _fetch(own_only) { _restrict(@#{pl what} ||= []) } end
   def _#{what}_cache()
@@ -127,6 +130,7 @@ module SDGUtils
   alias_method :#{what}!, :get_#{what}!
             RUBY
           end
+          self.send :include, mod
         end
       end
 
