@@ -64,7 +64,7 @@ module SDGUtils
             missing.consume
             params = missing.args + params
             body = body || missing.body
-            [missing.name, missing.super || supercls]
+            [missing.name, reresolve(missing.super) || supercls]
           when Class, String, Symbol
             # if a class with the same name already exists: ignore for
             # now, use its simple name and later attempt to create a
@@ -127,6 +127,18 @@ module SDGUtils
         ret = eval_body @cls, :class_eval, &body
 
         return @cls
+      end
+
+      def reresolve(cls_thing)
+        return nil unless cls_thing
+        cname = to_clsname(cls_thing) rescue nil
+        return cls_thing unless cname
+        mb = ModuleBuilder.get
+        if mb && mb.scope_module.const_defined?(cname)
+          mb.scope_module.const_get cname
+        else
+          cls_thing
+        end
       end
 
       def to_clsname(name)

@@ -98,6 +98,17 @@ class Module
   include SDGUtils::DSL::Ext::MModuleExt
 
   alias_method :old_const_missing, :const_missing
+  alias_method :old_cmp, :<
+
+  def <(rhs)
+    case rhs
+    when SDGUtils::DSL::MissingBuilder
+      mb = SDGUtils::DSL::MissingBuilder.new(self.relative_name)
+      mb < rhs
+    else
+      old_cmp rhs
+    end
+  end
 
   def const_missing(sym)
     begin
@@ -127,6 +138,9 @@ class String
   def <(rhs)
     return old_cmp rhs unless in_dsl?
     case rhs
+    when SDGUtils::DSL::MissingBuilder
+      mb = SDGUtils::DSL::MissingBuilder.new(self.relative_name)
+      mb < rhs
     when Class
       [self, rhs]
     else
