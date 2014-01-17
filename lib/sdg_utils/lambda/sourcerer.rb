@@ -123,6 +123,13 @@ module SDGUtils
         out
       end
 
+      def op_call_with_dot?(node, node2anno)
+        anno = node2anno[node.__id__] and
+          anno.fmt and
+          anno.fmt.size > 2 and
+          anno.fmt[1].start_with?(".")
+      end
+
       def reprint(node)
         return "" unless node
         node2anno = annotate_for_printing(node)
@@ -161,7 +168,6 @@ module SDGUtils
         end
         node2anno
       end
-
 
       def traverse_nodes(node, visit_opts={}, visitor_obj=nil, &visitor_blk)
         visitor = SDGUtils::Visitors::Visitor.new(visitor_obj, &visitor_blk)
