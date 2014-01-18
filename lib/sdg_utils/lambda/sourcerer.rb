@@ -123,7 +123,13 @@ module SDGUtils
         out
       end
 
-      def op_call_with_dot?(node, node2anno)
+      def bin_call?(node)
+        Parser::AST::Node === node and
+          node.type == :send and
+          node.children.size > 2
+      end
+
+      def bin_call_with_dot?(node, node2anno)
         anno = node2anno[node.__id__] and
           anno.fmt and
           anno.fmt.size > 2 and
