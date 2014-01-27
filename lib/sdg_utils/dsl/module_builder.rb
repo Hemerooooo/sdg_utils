@@ -13,8 +13,9 @@ module SDGUtils
       # constructor
       def initialize(options={})
         super({
-          :parent_module => SDGUtils::MetaUtils.caller_module,
-          :mods_to_include => []
+          :parent_module         => SDGUtils::MetaUtils.caller_module,
+          :include_module_mthd   => :__include,
+          :mods_to_include       => []
         }.merge!(options))
         opts_to_flat_array :mods_to_include
       end
@@ -85,10 +86,14 @@ module SDGUtils
         raise NameError, "Constant #{name} already defined in module #{parent_module}"\
           unless ret_module.class == Module
 
-        mods_to_include.each {|m|
-          ret_module.send(:include, m) unless ret_module.include? m
-          ret_module.send(:extend, m)
-        } # unless ret_module == Object
+        mods_to_include.each do |m|
+          if ret_module.respond_to? @conf.include_module_mthd
+            safe_send ret_module, @conf.include_module_mthd, m
+          else
+            ret_module.send(:include, m) unless ret_module.include? m
+            ret_module.send(:extend, m)
+          end
+        end # unless ret_module == Object
 
         ret_module
       end
