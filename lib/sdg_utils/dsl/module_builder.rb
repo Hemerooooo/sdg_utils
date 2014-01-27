@@ -15,6 +15,7 @@ module SDGUtils
         super({
           :parent_module         => SDGUtils::MetaUtils.caller_module,
           :include_module_mthd   => :__include,
+          :preamble              => proc{},
           :mods_to_include       => []
         }.merge!(options))
         opts_to_flat_array :mods_to_include
@@ -54,6 +55,7 @@ module SDGUtils
         @mod = create_or_get_module(name)
         @scope_mod = name ? @mod : @conf.parent_module
         safe_send @mod, @conf.created_mthd, @scope_mod
+        @conf.preamble[@mod] if @conf.preamble
         eval_body @mod, :module_eval, &body
         @mod
       end
