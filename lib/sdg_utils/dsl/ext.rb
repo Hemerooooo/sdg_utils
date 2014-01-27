@@ -137,15 +137,7 @@ class String
   #-----------------------------------------------------------------
   def <(rhs)
     return old_cmp rhs unless in_dsl?
-    case rhs
-    when SDGUtils::DSL::MissingBuilder
-      mb = SDGUtils::DSL::MissingBuilder.new(self.relative_name)
-      mb < rhs
-    when Class
-      [self, rhs]
-    else
-      old_cmp rhs
-    end
+    SDGUtils::DSL::MissingBuilder.new(self) < rhs
   end
 end
 
