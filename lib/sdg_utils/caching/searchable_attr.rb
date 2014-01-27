@@ -187,12 +187,12 @@ module SDGUtils
       end
 
       def _get_by(col, key)
-        col.find {|e| e.name == key.to_s}
+        col.find {|e| e.name.to_s == key.to_s}
       end
 
       def _find_by(col, key)
         return nil unless key
-        col.find {|e| e.name.end_with?(key.to_s)}
+        col.find {|e| e.name.to_s.end_with?(key.to_s)}
       end
     end
 

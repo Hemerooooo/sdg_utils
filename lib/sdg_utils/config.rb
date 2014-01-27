@@ -30,7 +30,7 @@ module SDGUtils
       end
     end
 
-    def extend(hash, &block)
+    def extend(hash={}, &block)
       SDGUtils::Config.new(self, hash, &block)
     end
 

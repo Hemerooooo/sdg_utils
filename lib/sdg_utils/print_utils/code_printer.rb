@@ -76,7 +76,7 @@ module SDGUtils
       alias_method :pn, :print_nodes
 
       def to_s
-        @out
+        @out.dup
       end
 
       def depth() @depth end
