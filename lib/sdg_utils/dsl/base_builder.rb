@@ -84,15 +84,25 @@ module SDGUtils
         return_result
       end
 
-      def eval_body_now!
-        return unless @body_eval_proc
-        BaseBuilder.push_ctx(@module_builder)
-        do_in_builder{ @body_eval_proc.call() }
-        @body_eval_proc = nil
-        call_finish_if_done
-        return_result
-      ensure
-        BaseBuilder.pop_ctx
+      def eval_body_now!(*args, &block)
+        if block
+          @conf.do_with :defer_body_eval => true do
+            eval_body(*args, &block)
+          end
+          eval_body_now!
+        else
+          begin
+            body = @body_eval_proc || block
+            return unless body
+            BaseBuilder.push_ctx(@module_builder)
+            do_in_builder{ @body_eval_proc.call() }
+            @body_eval_proc = nil
+            call_finish_if_done
+            return_result
+          ensure
+            BaseBuilder.pop_ctx
+          end
+        end
       end
 
       protected
