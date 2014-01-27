@@ -3,6 +3,10 @@ module SDGUtils
   module MDelegator
     # #TODO def respond_to?
 
+    def respond_to?(name)
+      super(name) || (@target && @target.respond_to?(name))      
+    end
+
     def method_missing(name, *args, &block)
       # return super unless @target
       begin
