@@ -13,7 +13,7 @@ module SDGUtils
       # constructor
       def initialize(options={})
         super({
-          :parent_module         => SDGUtils::MetaUtils.caller_module,
+          :parent_module         => lambda{SDGUtils::MetaUtils.caller_module},
           :include_module_mthd   => :__include,
           :preamble              => proc{},
           :mods_to_include       => []
