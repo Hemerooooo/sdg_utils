@@ -25,5 +25,5 @@ PLATFORMS
 DEPENDENCIES
   method_source (~> 0.8.3)!
   nilio
-  parser (~> 2.0.0.pre7)
+  parser (>= 2.0.0.pre7)
   pry
