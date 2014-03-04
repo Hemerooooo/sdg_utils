@@ -73,11 +73,11 @@ module SDGUtils
           case ast.type
           when :block
             ast
-          # because of a bug in Parser, ast is not always :block
           when :send, :def
-            msg = "expected :#{ast.type} with exactly 3 children"
-            failparse[msg] unless ast.children.size == 3
-            extract_block(ast.children[2])
+            blk = ast.children.find{|n| Parser::AST::Node === n && n.type == :block}
+            msg = "could not find block in a :#{ast.type} node"
+            failparse[msg] unless blk
+            blk
           when :lvasgn
             extract_block(ast.children[1])
           else
