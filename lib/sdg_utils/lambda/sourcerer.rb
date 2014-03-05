@@ -67,17 +67,24 @@ module SDGUtils
         extract_block_body(block)
       end
 
-      def extract_block(ast)
-        failparse = proc{|str=""| fail "#{str}\ncouldn't parse:\n #{str}"}
+      def extract_block(ast, fail_unless_found=true)
+        failparse = proc{ |str=""|
+          fail_unless_found ? fail("#{str}\ncouldn't parse:\n #{str}") : nil }
         root_block =
           case ast.type
           when :block
             ast
           when :send, :def
-            blk = ast.children.find{|n| Parser::AST::Node === n && n.type == :block}
-            msg = "could not find block in a :#{ast.type} node"
-            failparse[msg] unless blk
-            blk
+            blk = nil
+            ast.children[2..-1].each{|n|
+              blk = extract_block(n, false) if Parser::AST::Node === n
+              break if blk
+            }
+            if blk
+              blk
+            else
+              failparse["could not find block in a :#{ast.type} node"]
+            end
           when :lvasgn
             extract_block(ast.children[1])
           else
