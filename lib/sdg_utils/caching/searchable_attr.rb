@@ -33,11 +33,12 @@ module SDGUtils
         # def _sig_fnd_cache() @sig_fnd_cache ||= Cache.new "sig_find", :fast => true end
         #
         # public
-        # def sigs()         _sigs end
-        # def add_sig(obj)   _add_to(@sigs||=[], obj) end
-        # def get_sig(key)   _sig_cache.fetch(key)     {_get_by(_sigs, key)} end
-        # def find_sig(key)  _sig_fnd_cache.fetch(key) {_find_by(_sigs, key)} end
-        # def get_sig!(key)  get_sig(name) || fail "sig `#{name}' not found" end
+        # def sigs()          _sigs end
+        # def add_sig(obj)    _add_to(@sigs||=[], obj) end
+        # def get_sig(key)    _sig_cache.fetch(key)     {_get_by(_sigs, key)} end
+        # def find_sig(key)   _sig_fnd_cache.fetch(key) {_find_by(_sigs, key)} end
+        # def find_sigs(keys) keys.map{|k| find_sig(k) } end
+        # def get_sig!(key)   get_sig(name) || fail "sig `#{name}' not found" end
         #
         # alias_method :sig, :get_sig
         # alias_method :sig!, :get_sig!
@@ -62,6 +63,7 @@ module SDGUtils
   def add_#{what}(obj)   _add_to(@#{pl what}||=[], obj) end
   def get_#{what}(key)   _#{what}_cache.fetch(key)    { _get_by(_#{pl what}, key) } end
   def find_#{what}(key)  _#{what}_fnd_cache.fetch(key){ _find_by(_#{pl what}, key) } end
+  def find_#{what}s(keys) keys.map{|k| find_#{what}(k) } end
   def get_#{what}!(key)  get_#{what}(key) || fail("#{what} `\#{key}' not found") end
 
   alias_method :#{what}, :get_#{what}
@@ -192,7 +194,11 @@ module SDGUtils
 
       def _find_by(col, key)
         return nil unless key
-        col.find {|e| e.name.to_s.end_with?(key.to_s)}
+        col.find {|e| 
+          ename = e.name.to_s
+          keyname = key.to_s
+          ename == keyname || ename.end_with?("::#{keyname}")
+        }
       end
     end
 

@@ -86,6 +86,8 @@ module SDGUtils
         self
       end
 
+      def call(*args) @name = @name.to_s + args.join("_") end
+
       # The first invocation expects a +Hash+ or an +Array+ and sets
       # the value of @args.  The second invocatin expets a singleton
       # array and sets the value of @ret_tupe.  Any subsequent
